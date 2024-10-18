@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot name="backpack_case" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Macro Definition -->
+    <xacro:macro name="backpack_case" params="parent_link xyz lwh">
+
+        <!-- Backpack Chassis -->
+        <link name="backpack_chassis">
+            <visual>
+                <geometry>
+                    <box size="${lwh}" />
+                </geometry>
+                <material name="Black">
+                    <color rgba="0 0 0 1" />
+                </material>
+            </visual>
+            <collision>
+                <geometry>
+                    <box size="${lwh}" />
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="5.0" />
+                <origin xyz="0 0 0" />
+                <inertia
+                    ixx="0.1" ixy="0.0" ixz="0.0"
+                    iyy="0.1" iyz="0.0"
+                    izz="0.1" />
+            </inertial>
+        </link>
+
+        <joint name="backpack_mount_joint" type="fixed">
+            <parent link="${parent_link}" />
+            <child link="backpack_chassis" />
+            <origin xyz="${xyz}" rpy="0 0 0" />
+        </joint> 
+
+        <gazebo reference="backpack_chassis">
+            <material>Gazebo/Black</material>
+        </gazebo>
+
+    </xacro:macro>
+
+</robot>

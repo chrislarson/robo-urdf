@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+
+<robot name="sentry_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+  <xacro:property name="PI" value="3.1415926"/>
+  <xacro:property name="INCH" value="0.0254"/>
+
+  <xacro:macro name="default_inertial" params="mass">
+    <inertial>
+      <mass value="${mass}" />
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                    iyy="0.01" iyz="0.0" izz="0.01" />
+    </inertial>
+  </xacro:macro>
+
+  <link name="dummy"/>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${32 * INCH} ${18 * INCH} ${32 * INCH}"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${32 * INCH} ${18 * INCH} ${32 * INCH}"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+    <xacro:default_inertial mass="8.2"/>
+  </link>
+
+  <joint name="dummy_joint" type="fixed">
+     <parent link="dummy"/>
+     <child link="base_link"/>
+  </joint>
+
+
+  <!-- Gazebo插件设置相关 -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+  <gazebo reference="imu_link">
+    <material>Gazebo/BuildingFrame</material>
+  </gazebo>
+  <gazebo reference="livox_frame">
+    <material>Gazebo/LightBlueLaser</material>
+  </gazebo>
+
+  <!-- Drive controller plugin-->
+  <!-- https://github.com/ros-simulation/gazebo_ros_pkgs/wiki/ROS-2-Migration:-Planar-Move -->
+  <gazebo>
+    <plugin name="mecanum_controller" filename="libgazebo_ros_planar_move.so">
+      <ros>
+        <!-- Add a namespace -->
+        <namespace>/</namespace>
+        <!-- Remap the default topic -->
+        <remapping>cmd_vel:=cmd_vel_chassis</remapping>
+        <remapping>odom:=odom</remapping>
+      </ros>
+
+      <!-- Set control loop update rate -->
+      <update_rate>100</update_rate>
+      <!-- Set odom publish rate -->
+      <publish_rate>10</publish_rate>
+
+      <!-- Set if odom required -->
+      <publish_odom>false</publish_odom>
+      <publish_odom_tf>false</publish_odom_tf>
+
+      <!-- Frame IDs -->
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+
+      <!-- Set odom covariance -->
+      <covariance_x>0.0001</covariance_x>
+      <covariance_y>0.0001</covariance_y>
+      <covariance_yaw>0.01</covariance_yaw>
+    </plugin>
+  </gazebo>
+
+
+</robot>

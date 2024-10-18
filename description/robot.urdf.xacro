@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+
+    <xacro:include filename="sentry_robot_sim.xacro" />
+    <xacro:include filename="backpack_case.xacro"/>
+    <xacro:include filename="lidar_mount.xacro"/>
+
+    <xacro:property name="INCH" value="0.0254" />
+    <xacro:property name="PI" value="3.141592653589793" />
+
+    <xacro:property name="BACKPACK_CASE_LENGTH" value="${18.25 * INCH}" />
+    <xacro:property name="BACKPACK_CASE_WIDTH" value="${8 * INCH}" />
+    <xacro:property name="BACKPACK_CASE_HEIGHT" value="${12.625 * INCH}" />
+
+    <xacro:property name="LIDAR_MOUNT_LENGTH" value="${5.875 * INCH}" />
+    <xacro:property name="LIDAR_MOUNT_WIDTH" value="${5.875 * INCH}" />
+    <xacro:property name="LIDAR_MOUNT_HEIGHT" value="${7.125 * INCH}" />
+
+    <!-- TODO: Parameterize the robot dimensions for placing backpack -->
+    <!-- TODO: Parameterize mass/inertial characteristics of backpack -->
+    <xacro:backpack_case 
+        lwh="${BACKPACK_CASE_LENGTH} ${BACKPACK_CASE_WIDTH} ${BACKPACK_CASE_HEIGHT}" 
+        parent_link="base_link" 
+        xyz="0 0 ${((32 * INCH) + (BACKPACK_CASE_HEIGHT)) / 2}" 
+    />
+    <xacro:lidar_mount 
+        lwh="${LIDAR_MOUNT_LENGTH} ${LIDAR_MOUNT_WIDTH} ${LIDAR_MOUNT_HEIGHT}" 
+        h = "${LIDAR_MOUNT_HEIGHT}"
+        parent_link="backpack_chassis" 
+        xyz="${(BACKPACK_CASE_LENGTH - LIDAR_MOUNT_LENGTH) / 2} 0 ${(BACKPACK_CASE_HEIGHT + LIDAR_MOUNT_HEIGHT) / 2}" 
+        rpy="${PI} 0 0"
+    />
+
+</robot>

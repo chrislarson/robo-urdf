@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<robot name="backpack_case" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find ros2_livox_simulation)/urdf/mid360.xacro" />
+
+    <xacro:property name="INCH" value="0.0254" />
+    <xacro:property name="LIDAR_SENSOR_HEIGHT" value="${2.25 * INCH}" />
+
+    <!-- Macro Definition -->
+    <xacro:macro name="lidar_mount" params="parent_link lwh xyz rpy h">
+
+        <!-- Lidar Mount Structure -->
+        <link name="lidar_mount">
+            <visual>
+                <geometry>
+                    <box size="${lwh}" />
+                </geometry>
+                <material name="Transparent">
+                    <color rgba="0 0 0 0" />
+                </material>
+            </visual>
+            <collision>
+                <geometry>
+                    <box size="${lwh}" />
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="5.0" />
+                <origin xyz="0 0 0" />
+                <inertia
+                    ixx="0.1" ixy="0.0" ixz="0.0"
+                    iyy="0.1" iyz="0.0"
+                    izz="0.1" />
+            </inertial>
+        </link>
+
+        <!-- Mount Structure Joint -->
+        <joint name="lidar_mount_joint" type="fixed">
+            <parent link="${parent_link}" />
+            <child link="lidar_mount" />
+            <origin xyz="${xyz}" rpy="${rpy}" />
+        </joint>
+
+        <!-- Lidar Sensor -->
+        <xacro:mid360 name="livox_frame" parent="lidar_mount" topic="/livox/lidar">
+            <origin xyz="0 0 ${(-1*h + LIDAR_SENSOR_HEIGHT) / 2}" rpy="0 0 0" />
+        </xacro:mid360>
+
+        <!-- For simulation, we add a Gazebo IMU sensor. -->
+
+        <!-- IMU Link -->
+        <link name="imu_link">
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.05 0.05 0.05" />
+                </geometry>
+            </collision>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.05 0.05 0.05" />
+                </geometry>
+                <material name="Transparent">
+                    <color rgba="0 0 0 0" />
+                </material>
+            </visual>
+            <inertial>
+                <mass value="1e-2" />
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+            </inertial>
+        </link>
+
+
+        <!-- IMU Joint -->
+        <joint name="imu_joint" type="fixed">
+            <parent link="lidar_mount" />
+            <child link="imu_link" />
+            <origin xyz="0 0 ${(-1*h + LIDAR_SENSOR_HEIGHT) / 2}" rpy="0 0 0" />
+        </joint>
+
+        <!-- IMU Sensor (Sim) -->
+        <gazebo reference="imu_link">
+            <sensor name="mid360_imu" type="imu">
+                <always_on>true</always_on>
+                <update_rate>100</update_rate>
+                <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+                    <ros>
+                        <namespace>/</namespace>
+                        <remapping>~/out:=/livox/imu</remapping>
+                    </ros>
+                    <frame_name>imu_link</frame_name>
+                </plugin>
+            </sensor>
+        </gazebo>
+
+
+        <gazebo reference="lidar_mount">
+            <material>Gazebo/GreyTransparent</material>
+        </gazebo>
+
+        <gazebo reference="imu_link">
+            <material>Gazebo/GreyTransparent</material>
+        </gazebo>
+
+
+    </xacro:macro>
+
+</robot>
